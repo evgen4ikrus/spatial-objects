@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row">
+  <table class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th scope="col">Порядковый номер:</th>
+      <th scope="col">Название участка:</th>
+      <th scope="col">Площадь:</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for land_plot in page_obj %}
+    <tr>
+      <td>{{ land_plot.serial_number }}</td>
+      <td><a href="{% url 'land-plot-detail' pk=land_plot.gid %}"
+             style="text-decoration: none;">{{ land_plot.description }}</a></td>
+      <td>{{ land_plot.area }}Га</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+
+  </table>
+
+</div>
+
+{% include 'pagination.html' %}
+
+{% endblock content %}
