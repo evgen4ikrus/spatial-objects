@@ -20,8 +20,8 @@ def create_land_plot_table(cursor):
             type_land integer,
             CONSTRAINT land_plot_pk PRIMARY KEY (gid),
             CONSTRAINT type_land_fk
-                FOREIGN KEY(type_land) 
-                    REFERENCES type_land(gid)
+                FOREIGN KEY (type_land)
+                REFERENCES type_land(gid)
         );
         '''
     )
