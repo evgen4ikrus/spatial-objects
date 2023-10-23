@@ -54,8 +54,12 @@ class Command(BaseCommand):
         coordinate = options['coordinate']
         logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s %(message)s', level=logging.DEBUG)
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT ST_X(ST_AsText(ST_Centroid(polygon))), ST_Y(ST_AsText(ST_Centroid(polygon))) "
-                           f"FROM land_plot WHERE gid={land_plot_id};")
+            cursor.execute(
+                f"""
+                SELECT ST_X(ST_AsText(ST_Centroid(polygon))), ST_Y(ST_AsText(ST_Centroid(polygon)))
+                FROM land_plot WHERE gid={land_plot_id};
+                """
+            )
             polygon_center = (cursor.fetchone())
             longitude, latitude = polygon_center
             raw_routes = get_routes(f'{longitude},{latitude}', coordinate)
