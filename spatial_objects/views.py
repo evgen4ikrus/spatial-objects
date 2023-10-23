@@ -1,28 +1,30 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import connection
 from django.http import Http404
 from django.shortcuts import render
 
 
+@login_required(login_url='/accounts/login/')
 def land_plot_list(request):
     with connection.cursor() as cursor:
         cursor.execute('SELECT description, area, gid FROM land_plot;')
         records = cursor.fetchall()
     land_plots = []
-    for serial_number, land_plot in enumerate(records, start=1):
+    for land_plot in records:
         description, area, gid = land_plot
         land_plots.append({
             'description': description,
             'area': round(area, 1),
-            'serial_number': serial_number,
             'gid': gid,
         })
-    paginator = Paginator(land_plots, 20)  # Show 25 contacts per page.
+    paginator = Paginator(land_plots, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     return render(request, template_name='land_plot_list.html', context={"page_obj": page_obj})
 
 
+@login_required(login_url='/accounts/login/')
 def land_plot_detail(request, pk):
     with connection.cursor() as cursor:
         cursor.execute(f'SELECT land_plot.gid, area, status, date_create, description, polygon, type_land.name '

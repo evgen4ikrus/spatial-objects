@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block title %}Участки{% endblock title %}
 {% block content %}
 
 <div class="row">
@@ -14,7 +15,7 @@
     <tbody>
     {% for land_plot in page_obj %}
     <tr>
-      <td>{{ land_plot.serial_number }}</td>
+      <td>{{ land_plot.gid }}</td>
       <td><a href="{% url 'land-plot-detail' pk=land_plot.gid %}"
              style="text-decoration: none;">{{ land_plot.description }}</a></td>
       <td>{{ land_plot.area }}Га</td>
