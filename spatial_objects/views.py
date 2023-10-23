@@ -8,14 +8,14 @@ from django.shortcuts import render
 @login_required(login_url='/accounts/login/')
 def land_plot_list(request):
     with connection.cursor() as cursor:
-        cursor.execute('SELECT description, area, gid FROM land_plot;')
+        cursor.execute('SELECT description, area, gid FROM land_plot ORDER BY land_plot.gid;')
         records = cursor.fetchall()
     land_plots = []
     for land_plot in records:
         description, area, gid = land_plot
         land_plots.append({
             'description': description,
-            'area': round(area, 1),
+            'area': round(area, 2),
             'gid': gid,
         })
     paginator = Paginator(land_plots, 20)

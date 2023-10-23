@@ -27,27 +27,32 @@ def fill_road_table(cursor, roads):
         cursor.execute(
             f"""
             INSERT INTO road (gid, name, status, geom, len)
-            VALUES ({gid}, '{name}', {status}, '{geom}', ST_Length('{geom}'::geography)/1000)
+            VALUES ({gid}, '{name}', {status}, '{geom}', ST_Length('{geom}')/1000)
             """
         )
 
 
 def fill_land_plot_table(cursor, land_plots):
     for land_plot in land_plots:
+
         gid = land_plot.get('gid')
         name = land_plot.get('name')
         date_create = land_plot.get('date_create')
         description = land_plot.get('description')
         polygon = land_plot.get('polygon')
         type_land = land_plot.get('type_land')
+
+        cursor.execute(f"SELECT road FROM road WHERE ST_Intersects(road.geom, '{polygon}');")
+        crossing_roads = cursor.fetchall()
+        status = True if crossing_roads else False
+
         cursor.execute(
             f"""
             INSERT INTO land_plot (gid, name, area, status, date_create, description, polygon, type_land)
-            VALUES ({gid}, '{name}', ST_Area('{polygon}')/107640, True, '{date_create}', '{description}', 
+            VALUES ({gid}, '{name}', ST_Area('{polygon}')*1000, {status}, '{date_create}', '{description}', 
                 '{polygon}', {type_land})
             """
         )
-        # FIXME: Исправить поле status
 
 
 def get_data_from_file(file_path):
