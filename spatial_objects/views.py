@@ -30,30 +30,22 @@ def land_plot_detail(request, pk):
         cursor.execute(
             f"""
             WITH distance as(
-                SELECT MIN(ST_Distance(polygon, geom)) min_distance
-                FROM road, land_plot 
+                SELECT MIN(ST_Distance(polygon, geom)) as min_distance
+                FROM road, land_plot
                 WHERE land_plot.gid={pk}
             ),
             nearest_road as(
-                SELECT ST_Distance(polygon, geom) as min_dis, 
-                       road.name,
-                       land_plot.gid
+                SELECT ST_Distance(polygon, geom) as min_dis, road.name, land_plot.gid
                 FROM road, land_plot
                 WHERE land_plot.gid={pk} and ST_Distance(polygon, geom) = (SELECT min_distance FROM distance)
-            ),
-            current_land_plot as(
-                SELECT land_plot.gid, area, status, date_create, description, polygon, type_land.name
-                FROM land_plot JOIN type_land
-                ON land_plot.type_land = type_land.gid
-                WHERE land_plot.gid={pk}
             )
-            SELECT current_land_plot.gid, area, status, date_create,
-                   description, polygon, current_land_plot.name, nearest_road.name,
+            SELECT land_plot.gid, area, status, date_create, description, polygon, type_land.name, 
+                   nearest_road.name,
                    CASE WHEN min_dis < 1
-                   THEN CAST(min_dis * 1000 AS CHAR(15)) || ' м'
-                   ELSE CAST(min_dis AS CHAR(15)) || ' км'
-                   END
-            FROM current_land_plot, nearest_road; 
+                   THEN CAST(min_dis * 1000 AS CHAR(5)) || ' м'
+                   ELSE CAST(min_dis AS CHAR(10)) || ' км' END
+            FROM distance, nearest_road, land_plot JOIN  type_land
+            ON land_plot.type_land = type_land.gid WHERE land_plot.gid={pk};
             """
         )
         record = cursor.fetchone()
@@ -73,4 +65,4 @@ def land_plot_detail(request, pk):
         }
         context = {'land_plot': land_plot}
         return render(request, template_name='land_plot_detail.html', context=context)
-    raise Http404("Poll does not exist")
+    raise Http404("Страница не найдена")
