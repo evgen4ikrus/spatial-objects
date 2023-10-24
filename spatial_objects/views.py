@@ -62,7 +62,7 @@ def land_plot_detail(request, pk):
         min_distance, length_measure = min_distance.split()
         land_plot = {
             'gid': gid,
-            'area': round(area, 1),
+            'area': round(area, 2),
             'status': status,
             'date_create': date_create,
             'description': description,

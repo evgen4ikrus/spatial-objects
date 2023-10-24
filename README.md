@@ -108,3 +108,126 @@ docker-compose run --rm web-app sh -c "python manage.py find_route <land_plot_id
 python3 manage.py find_route <land_plot_id> <coordinate>
 # например python3 manage.py find_route 64 '46.44182986,60.323853125'
 ```
+
+### Задание на работу с чужим кодом:
+<details>
+<summary>Было так:</summary>
+
+```python
+class html_copy_to:
+    ###  
+    def download_source(self):
+        headers = { 'User-Agent' : self.ua }
+
+        if self.ref != '':
+            o = urlparse.urlparse(self.ref)
+            self.scheme = o.scheme
+            self.host = o.netloc
+
+            headers['Referer'] = self.ref
+
+        if self.http_username != '' or self.http_password != '':
+            auth = self.http_username + ':' + self.http_password
+            auth = auth.encode('ascii')
+            auth = base64.b64encode(auth)
+
+            headers['Authorization'] = 'Basic ' + auth
+
+        try:
+            req = urllib2.Request(self.url, None, headers)
+            r = urllib2.urlopen(req)
+            h = r.info()
+
+            if h['Content-Type'] != '' and h['Content-Type'] != None:
+                if re.match('^(image|text|application)\/', h['Content-Type']) is None:
+                    self.set_response('error:Invalid mime-type: ' + h['Content-Type'])
+                else:
+                    mime = str(re.sub('[;]([\s\S]+)$', '', h['Content-Type'])).strip().lower()
+                    mime = re.sub('/x-', '/', mime)
+
+                    if mime in self.mimes:
+                        self.data = r.read()
+
+                        extension = re.sub('^(image|text|application)\/', '', mime)
+                        extension = re.sub('(windows[-]bmp|ms[-]bmp)', 'bmp', extension)
+                        extension = re.sub('(svg[+]xml|svg[-]xml)', 'svg', extension)
+                        extension = extension.replace('xhtml[+]xml', 'xhtml')
+                        extension = extension.replace('jpeg', 'jpg')
+
+                        self.real_extension = extension
+                        self.real_mimetype  = mime
+
+                        cp = h['Content-Type'].find(';');
+
+                        if cp != -1:
+                            cp = cp + 1
+                            charset = h['Content-Type']
+                            self.real_charset = ';' + charset[cp:].strip()
+
+                        self.save_file()
+                    else:
+                        self.set_response('error:Invalid mime-type: ' + h['Content-Type'])
+            else:
+                self.set_response('error:No mime-type defined')
+
+            r.close()
+        except urllib2.URLError, e:
+            self.set_response('error:SOCKET: ' + str(e.reason))
+```
+
+</details>
+
+<details>
+<summary>Изменил на:</summary>
+
+```python
+class HTMLCopyTo:
+    ###
+    def download_source(self):
+        headers = {'User-Agent': self.user_agent}
+
+        if self.ref:
+            parsed_ref = urlparse.urlparse(self.ref)
+            self.scheme = parsed_ref.scheme
+            self.host = parsed_ref.netloc
+            headers['Referer'] = self.ref
+
+        if self.http_username and self.http_password:
+            raw_auth = '{}:{}'.format(self.http_username, self.http_password)
+            auth = base64.b64encode(raw_auth.encode('ascii'))
+            headers['Authorization'] = 'Basic {}'.format(auth)
+
+        response = None
+        try:
+            request = urllib2.Request(self.url, None, headers)
+            response = urllib2.urlopen(request)
+            header = response.info()
+
+            if not header['Content-Type']:
+                self.set_response('error:No mime-type defined')
+                return
+
+            mime, params = cgi.parse_header(header['Content-Type'])
+
+            if mime not in self.mimes:
+                self.set_response('error:Invalid mime-type: {}'.format(header["Content-Type"]))
+                return
+
+            if params.get('charset'):
+                self.real_charset = 'charset={}'.format(params.get('charset'))
+
+            self.data = response.read()
+            self.real_extension = mimetypes.guess_extension(mime, strict=True)
+            self.real_mimetype = mime
+
+            self.save_file()
+
+        except urllib2.URLError as err:
+            self.set_response('error:SOCKET: {}'.format(str(e.reason)))
+
+        finally:
+            if response:
+                response.close()
+```
+
+</details>
