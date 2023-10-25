@@ -9,6 +9,10 @@
 ```shell
 git clone https://github.com/evgen4ikrus/spatial-objects.git
 ```
+Перейдите в директорию проекта:
+```shell
+cd spatial-objects/
+```
 Скачайте и соберите докер-образы с помощью Docker-Сompose:
 ```shell
 docker-compose build
@@ -48,7 +52,7 @@ git clone https://github.com/evgen4ikrus/spatial-objects.git
 ```
 Перейдите в директорию проекта:
 ```commandline
-cd spatial_objects/
+cd spatial-objects/
 ```
 У вас уже должна быть создана БД PostgreSQL. (Если ее нет, создайте, например можете воспользоваться [инструкцией](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-20-04))
 
