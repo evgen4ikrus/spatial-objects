@@ -27,7 +27,7 @@ def fill_road_table(cursor, roads):
         cursor.execute(
             f"""
             INSERT INTO road (gid, name, status, geom, len)
-            VALUES ({gid}, '{name}', {status}, '{geom}', ST_Length('{geom}')/1000)
+            VALUES ({gid}, '{name}', {status}, '{geom}', ST_Length('{geom}'::geography) / 1000)
             """
         )
 
@@ -49,8 +49,8 @@ def fill_land_plot_table(cursor, land_plots):
         cursor.execute(
             f"""
             INSERT INTO land_plot (gid, name, area, status, date_create, description, polygon, type_land)
-            VALUES ({gid}, '{name}', ST_Area('{polygon}')*1000, {status}, '{date_create}', '{description}', 
-                '{polygon}', {type_land})
+            VALUES ({gid}, '{name}', ST_Area('{polygon}'::geography) / 107639, {status}, '{date_create}', 
+                   '{description}', '{polygon}', {type_land})
             """
         )
 

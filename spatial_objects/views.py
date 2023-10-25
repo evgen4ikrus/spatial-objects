@@ -29,21 +29,22 @@ def land_plot_detail(request, pk):
     with connection.cursor() as cursor:
         cursor.execute(
             f"""
-            WITH distance as(
-                SELECT MIN(ST_Distance(polygon, geom)) as min_distance
+            WITH distance AS(
+                SELECT MIN(ST_Distance(polygon::geography, geom::geography)) as min_distance
                 FROM road, land_plot
                 WHERE land_plot.gid={pk}
             ),
-            nearest_road as(
-                SELECT ST_Distance(polygon, geom) as min_dis, road.name, land_plot.gid
+            nearest_road AS(
+                SELECT ST_Distance(polygon::geography, geom::geography) as min_dis, road.name, land_plot.gid
                 FROM road, land_plot
-                WHERE land_plot.gid={pk} and ST_Distance(polygon, geom) = (SELECT min_distance FROM distance)
+                WHERE land_plot.gid={pk} 
+                    AND ST_Distance(polygon::geography, geom::geography) = (SELECT min_distance FROM distance)
             )
             SELECT land_plot.gid, area, status, date_create, description, polygon, type_land.name, 
                    nearest_road.name,
-                   CASE WHEN min_dis < 1
-                   THEN CAST(min_dis * 1000 AS CHAR(5)) || ' м'
-                   ELSE CAST(min_dis AS CHAR(10)) || ' км' END
+                   CASE WHEN min_dis > 1000
+                   THEN CAST(min_dis / 1000 AS CHAR(5)) || ' км'
+                   ELSE CAST(min_dis AS CHAR(10)) || ' м' END
             FROM distance, nearest_road, land_plot JOIN  type_land
             ON land_plot.type_land = type_land.gid WHERE land_plot.gid={pk};
             """
