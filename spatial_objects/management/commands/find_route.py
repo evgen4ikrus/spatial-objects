@@ -31,14 +31,14 @@ def generate_message_about_routes(routes, waypoints):
         message = f'{index}. ключевая точка - {round(point["distance"] / 1000, 2)}км'
         waypoints_message += message + '\n'
     message = f"""
-###Самый короткий маршрут
+###Самый короткий маршрут:
 Расстояние - {round(routes[0]['distance'] / 1000, 1)}км
 Время в пути - {get_time(int(routes[0]['duration']))}
 Точки маршрута:
 {waypoints_message}
 """
     if len(routes) > 1:
-        message += '###Дополнительные маршруты (основная информация)\n'
+        message += '###Дополнительные маршруты (основная информация):\n'
         for number, route in enumerate(routes[1:], start=1):
             message += f'{number}. Расстояние {round(route["distance"] / 1000, 1)}км, {get_time(route["duration"])}'
     else:
@@ -60,12 +60,12 @@ class Command(BaseCommand):
                 FROM land_plot WHERE gid={land_plot_id};
                 """
             )
-            polygon_center = (cursor.fetchone())
-            longitude, latitude = polygon_center
-            raw_routes = get_routes(coordinate, f'{longitude},{latitude}')
-            routes, waypoints = raw_routes['routes'], raw_routes['waypoints']
-            message = generate_message_about_routes(routes, waypoints)
-            logger.info(message)
+            polygon_center = cursor.fetchone()
+        longitude, latitude = polygon_center
+        raw_routes = get_routes(coordinate, f'{longitude},{latitude}')
+        routes, waypoints = raw_routes['routes'], raw_routes['waypoints']
+        message = generate_message_about_routes(routes, waypoints)
+        logger.info(message)
 
     def add_arguments(self, parser):
         parser.add_argument('land_plot_id', help='Id земельного участка;')
